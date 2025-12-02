@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat</title>
+
+    <style>
+        :root {
+            --theme: #34d399;
+            --bg: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            --text: #fff;
+            --bubble-user: #3b82f6;
+            --bubble-bot: rgba(255,255,255,0.25);
+            --card-bg: rgba(255,255,255,0.15);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-box {
+            width: 95%;
+            max-width: 650px;
+            height: 92vh;
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        /* Header with Bike Logo */
+        .header {
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            font-size: 22px;
+            font-weight: 700;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .header img {
+            width: 40px;
+        }
+
+        /* Quick action buttons */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 8px 14px;
+            border-radius: 14px;
+            background: var(--theme);
+            color: black;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            border: none;
+            transition: 0.2s;
+        }
+
+        .quick-btn:hover {
+            transform: scale(1.06);
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .msg-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-size: cover;
+        }
+
+        .bot-avatar {
+            background-image: url('https://cdn-icons-png.flaticon.com/512/4712/4712035.png');
+        }
+
+        .user-avatar {
+            background-image: url('https://cdn-icons-png.flaticon.com/512/847/847969.png');
+        }
+
+        .bubble {
+            padding: 10px 15px;
+            border-radius: 12px;
+            max-width: 75%;
+            animation: fadeIn 0.3s ease;
+            color: var(--text);
+        }
+
+        .user-msg {
+            background: var(--bubble-user);
+            color: white;
+            margin-left: auto;
+        }
+
+        .bot-msg {
+            background: var(--bubble-bot);
+        }
+
+        /* Typing effect */
+        .typing {
+            font-style: italic;
+            opacity: 0.7;
+            margin-left: 45px;
+            animation: blink 1.2s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0.2; }
+        }
+
+        /* Bike Cards */
+        .bike-card {
+            background: rgba(255,255,255,0.22);
+            padding: 12px;
+            border-radius: 14px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .bike-card img {
+            width: 70px;
+            border-radius: 10px;
+        }
+
+        .bike-name {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .bike-info {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Input */
+        .input-area {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 14px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            margin-left: 10px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 14px;
+            background: var(--theme);
+            color: black;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="chat-box">
+
+        <div class="header">
+            <img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png">
+            BerlinBike Rentals
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div class="quick-actions">
+            <div class="quick-btn" onclick="quickAsk('Show available bikes')">Available Bikes</div>
+            <div class="quick-btn" onclick="quickAsk('What is the minimum age for rental?')">Age Limit</div>
+            <div class="quick-btn" onclick="quickAsk('What are rental charges?')">Rental Price</div>
+            <div class="quick-btn" onclick="quickAsk('Show rental locations')">Nearby Stations</div>
+            <div class="quick-btn" onclick="quickAsk('Any offers available?')">Offers</div>
+        </div>
+
+        <div class="messages" id="messages"></div>
+
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Ask something...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+
+    </div>
+
+<script>
+
+    function quickAsk(msg){
+        document.getElementById("userInput").value = msg;
+        sendMessage();
+    }
+
+    function addTyping() {
+        const box = document.getElementById("messages");
+        const t = document.createElement("div");
+        t.id = "typing";
+        t.className = "typing";
+        t.innerText = "Bot is typing...";
+        box.appendChild(t);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function removeTyping() {
+        const t = document.getElementById("typing");
+        if (t) t.remove();
+    }
+
+    function showBikeCards() {
+        const bikes = [
+            {name: "BerlinBike Classic", img: "https://i.postimg.cc/XYH3zW6s/bike1.jpg", rate: "$4/hr"},
+            {name: "BerlinBike Electric", img: "https://i.postimg.cc/5tDkzH4G/bike2.jpg", rate: "$6/hr"},
+            {name: "BerlinBike Mountain", img: "https://i.postimg.cc/4yJgM8cx/bike3.jpg", rate: "$5/hr"}
+        ];
+
+        const messages = document.getElementById("messages");
+        bikes.forEach(b => {
+            messages.innerHTML += `
+                <div class="bike-card">
+                    <img src="${b.img}">
+                    <div>
+                        <div class="bike-name">${b.name}</div>
+                        <div class="bike-info">Price: ${b.rate}</div>
+                        <div class="bike-info">Available now 🚴‍♂️</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('userInput');
+        const messages = document.getElementById('messages');
+        const message = input.value.trim();
+
+        if (!message) return;
+
+        messages.innerHTML += `
+        <div class="msg-row" style="justify-content:flex-end;">
+            <div class="bubble user-msg"><strong>You:</strong> ${message}</div>
+            <div class="avatar user-avatar"></div>
+        </div>`;
+
+        input.value = "";
+        messages.scrollTop = messages.scrollHeight;
+
+        addTyping();
+
+        const res = await fetch('/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({query: message})
+        });
+
+        const data = await res.json();
+        removeTyping();
+
+        messages.innerHTML += `
+        <div class="msg-row">
+            <div class="avatar bot-avatar"></div>
+            <div class="bubble bot-msg"><strong>Bot:</strong> ${data.response}</div>
+        </div>
+        `;
+
+        if (message.toLowerCase().includes("available bikes")) {
+            showBikeCards();
+        }
+
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    document.getElementById("userInput").addEventListener("keypress", (e)=>{
+        if (e.key === "Enter") sendMessage();
+    });
+
+</script>
+
+</body>
+</html>
